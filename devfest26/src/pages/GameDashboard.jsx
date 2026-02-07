@@ -39,11 +39,15 @@ export default function GameDashboard() {
             socket.onopen = () => {
                 setIsConnected(true)
                 setIsRunning(true)
-                // Send current mappings
+                // Send current mappings and sensitivity
                 const mappings = localStorage.getItem('movementMappings')
-                if (mappings) {
-                    socket.send(JSON.stringify({ type: 'config', mappings: JSON.parse(mappings) }))
-                }
+                const sensitivity = localStorage.getItem('movementSensitivity')
+
+                socket.send(JSON.stringify({
+                    type: 'config',
+                    mappings: mappings ? JSON.parse(mappings) : null,
+                    sensitivity: sensitivity ? JSON.parse(sensitivity) : null
+                }))
             }
 
             socket.onclose = () => {

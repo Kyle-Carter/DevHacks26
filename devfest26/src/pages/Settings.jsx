@@ -25,9 +25,24 @@ export default function Settings() {
     const [draggedMovement, setDraggedMovement] = useState(null)
     const [saved, setSaved] = useState(false)
 
+    const [sensitivity, setSensitivity] = useState(() => {
+        const saved = localStorage.getItem('movementSensitivity')
+        return saved ? JSON.parse(saved) : {
+            jumpSensitivity: 0.5,
+            squatSensitivity: 0.5,
+            sideSensitivity: 0.5,
+            repeatDelay: 1.0,
+            repeatInterval: 0.2
+        }
+    })
+
     useEffect(() => {
         localStorage.setItem('movementMappings', JSON.stringify(mappings))
     }, [mappings])
+
+    useEffect(() => {
+        localStorage.setItem('movementSensitivity', JSON.stringify(sensitivity))
+    }, [sensitivity])
 
     const handleDragStart = (movementId) => {
         setDraggedMovement(movementId)
@@ -59,17 +74,29 @@ export default function Settings() {
 
     const handleSave = () => {
         localStorage.setItem('movementMappings', JSON.stringify(mappings))
+        localStorage.setItem('movementSensitivity', JSON.stringify(sensitivity))
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
     }
 
     const handleReset = () => {
         setMappings(DEFAULT_MAPPINGS)
+        setSensitivity({
+            jumpSensitivity: 0.5,
+            squatSensitivity: 0.5,
+            sideSensitivity: 0.5,
+            repeatDelay: 1.0,
+            repeatInterval: 0.2
+        })
     }
 
     const getMovementForKey = (keyCode) => {
         const movementId = Object.keys(mappings).find(m => mappings[m] === keyCode)
         return movementId ? MOVEMENTS.find(m => m.id === movementId) : null
+    }
+
+    const handleSensitivityChange = (key, value) => {
+        setSensitivity(prev => ({ ...prev, [key]: parseFloat(value) }))
     }
 
     return (
@@ -95,6 +122,50 @@ export default function Settings() {
                                 isDragging={draggedMovement === movement.id}
                             />
                         ))}
+                    </div>
+
+                    <div className="sensitivity-section" style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1rem' }}>
+                        <h3>Sensitivity & Tuning</h3>
+
+                        <div className="setting-group">
+                            <label>Jump Sensitivity ({sensitivity.jumpSensitivity})</label>
+                            <input
+                                type="range" min="0.1" max="1.0" step="0.05"
+                                value={sensitivity.jumpSensitivity}
+                                onChange={(e) => handleSensitivityChange('jumpSensitivity', e.target.value)}
+                            />
+                            <small>Lower = Easier to Jump</small>
+                        </div>
+
+                        <div className="setting-group">
+                            <label>Squat Sensitivity ({sensitivity.squatSensitivity})</label>
+                            <input
+                                type="range" min="0.1" max="1.0" step="0.05"
+                                value={sensitivity.squatSensitivity}
+                                onChange={(e) => handleSensitivityChange('squatSensitivity', e.target.value)}
+                            />
+                            <small>Lower = Easier to Squat</small>
+                        </div>
+
+                        <div className="setting-group">
+                            <label>Side Sensitivity ({sensitivity.sideSensitivity})</label>
+                            <input
+                                type="range" min="0.1" max="1.0" step="0.05"
+                                value={sensitivity.sideSensitivity}
+                                onChange={(e) => handleSensitivityChange('sideSensitivity', e.target.value)}
+                            />
+                            <small>Lower = Easier to Move Side</small>
+                        </div>
+
+                        <div className="setting-group">
+                            <label>Hold Delay ({sensitivity.repeatDelay}s)</label>
+                            <input
+                                type="range" min="0.1" max="2.0" step="0.1"
+                                value={sensitivity.repeatDelay}
+                                onChange={(e) => handleSensitivityChange('repeatDelay', e.target.value)}
+                            />
+                            <small>Time before key repeats/holds</small>
+                        </div>
                     </div>
                 </div>
 

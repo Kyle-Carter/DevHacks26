@@ -36,7 +36,13 @@ class MotionPlayBackend:
                 
                 if data['type'] == 'config':
                     # Update key bindings from frontend
-                    self.keyboard_controller.set_bindings(data['mappings'])
+                    if 'mappings' in data and data['mappings']:
+                        self.keyboard_controller.set_bindings(data['mappings'])
+                    
+                    # Update sensitivity settings
+                    if 'sensitivity' in data and data['sensitivity']:
+                        self.movement_analyzer.update_config(data['sensitivity'])
+                        
                     await websocket.send(json.dumps({'type': 'config_ack'}))
                     
                 elif data['type'] == 'start':
@@ -65,15 +71,16 @@ class MotionPlayBackend:
         self.running = True
         self.cap = cv2.VideoCapture(0)
         
-        if not self.cap.isOpened():
+        if not self.cap or not self.cap.isOpened():
             print("❌ Error: Could not open webcam")
             self.running = False
             return
         
         # Set camera properties for better performance
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        if self.cap:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.cap.set(cv2.CAP_PROP_FPS, 30)
         
         print("🎥 Camera initialized!")
         print("📍 Stand in view of camera and stay still for calibration...")
@@ -92,7 +99,7 @@ class MotionPlayBackend:
     
     def run_capture_loop(self):
         """Main capture and detection loop. MUST RUN ON MAIN THREAD."""
-        if not self.running:
+        if not self.running or not self.cap:
             return
 
         try:
@@ -118,18 +125,8 @@ class MotionPlayBackend:
                 if self.show_preview:
                     preview = self.pose_detector.draw_landmarks(frame.copy())
                     
-                    # Add status text
-                    status = "Calibrating..." if self.movement_analyzer.frame_count <= 30 else "Active"
-                    cv2.putText(preview, f"MotionPlay - {status}", (10, 30), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                    
-                    # Show active movements
-                    y_offset = 60
-                    for movement, active in movements.items():
-                        if active:
-                            cv2.putText(preview, f"► {movement.upper()}", (10, y_offset),
-                                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-                            y_offset += 25
+                    # Draw Bounding Box Feedback (Safe Zone, Labels, Calibration)
+                    preview = self.movement_analyzer.draw_feedback(preview)
                     
                     cv2.imshow('MotionPlay Preview', preview)
                     

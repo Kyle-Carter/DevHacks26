@@ -25,7 +25,7 @@ class KeyboardController:
         
         # Movement to key bindings (configured from frontend)
         self.bindings = {
-            'jump': 'Space',
+            'jump': 'ArrowUp',
             'squat': 'ArrowDown',
             'moveLeft': 'ArrowLeft',
             'moveRight': 'ArrowRight'
