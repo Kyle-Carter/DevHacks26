@@ -95,51 +95,53 @@ class MotionPlayBackend:
         if not self.running:
             return
 
-        print("🎥 Starting capture loop...")
-        while self.running:
-            ret, frame = self.cap.read()
-            if not ret:
-                continue
-            
-            # Flip frame horizontally for mirror effect
-            frame = cv2.flip(frame, 1)
-            
-            # Detect pose
-            landmarks = self.pose_detector.detect(frame)
-            
-            # Analyze movements
-            movements = self.movement_analyzer.analyze(landmarks)
-            
-            # Trigger keyboard input
-            self.keyboard_controller.on_movement(movements)
-            
-            # Show preview window
-            if self.show_preview:
-                preview = self.pose_detector.draw_landmarks(frame.copy())
+        try:
+            print("🎥 Starting capture loop...")
+            while self.running:
+                ret, frame = self.cap.read()
+                if not ret:
+                    continue
                 
-                # Add status text
-                status = "Calibrating..." if self.movement_analyzer.frame_count <= 30 else "Active"
-                cv2.putText(preview, f"MotionPlay - {status}", (10, 30), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                # Flip frame horizontally for mirror effect
+                frame = cv2.flip(frame, 1)
                 
-                # Show active movements
-                y_offset = 60
-                for movement, active in movements.items():
-                    if active:
-                        cv2.putText(preview, f"► {movement.upper()}", (10, y_offset),
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-                        y_offset += 25
+                # Detect pose
+                landmarks = self.pose_detector.detect(frame)
                 
-                cv2.imshow('MotionPlay Preview', preview)
+                # Analyze movements
+                movements = self.movement_analyzer.analyze(landmarks)
                 
-                # Handle key press for preview window
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q'):
-                    self.running = False
-                elif key == ord('r'):
-                    self.movement_analyzer.reset_calibration()
-        
-        self.stop_detection()
+                # Trigger keyboard input
+                self.keyboard_controller.on_movement(movements)
+                
+                # Show preview window
+                if self.show_preview:
+                    preview = self.pose_detector.draw_landmarks(frame.copy())
+                    
+                    # Add status text
+                    status = "Calibrating..." if self.movement_analyzer.frame_count <= 30 else "Active"
+                    cv2.putText(preview, f"MotionPlay - {status}", (10, 30), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    
+                    # Show active movements
+                    y_offset = 60
+                    for movement, active in movements.items():
+                        if active:
+                            cv2.putText(preview, f"► {movement.upper()}", (10, y_offset),
+                                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+                            y_offset += 25
+                    
+                    cv2.imshow('MotionPlay Preview', preview)
+                    
+                    # Handle key press for preview window
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q'):
+                        self.running = False
+                    elif key == ord('r'):
+                        self.movement_analyzer.reset_calibration()
+        finally:
+            self.stop_detection()
+
 
 def run_server(backend):
     """Run WebSocket server in a separate thread."""
