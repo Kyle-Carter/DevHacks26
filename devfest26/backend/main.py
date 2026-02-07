@@ -32,7 +32,7 @@ class MotionPlayBackend:
         try:
             async for message in websocket:
                 data = json.loads(message)
-                print(f"📩 Received: {data}")
+                # print(f"📩 Received: {data}") # Reduce verbosity
                 
                 if data['type'] == 'config':
                     # Update key bindings from frontend
@@ -40,11 +40,12 @@ class MotionPlayBackend:
                     await websocket.send(json.dumps({'type': 'config_ack'}))
                     
                 elif data['type'] == 'start':
-                    self.start_detection()
+                    # Camera is already running in main thread, just acknowledge
+                    # We could add logic to pause/resume detection processing if needed
                     await websocket.send(json.dumps({'type': 'started'}))
                     
                 elif data['type'] == 'stop':
-                    self.stop_detection()
+                    # Don't actually stop the camera loop, just acknowledge
                     await websocket.send(json.dumps({'type': 'stopped'}))
                     
                 elif data['type'] == 'recalibrate':
@@ -54,11 +55,10 @@ class MotionPlayBackend:
         except websockets.exceptions.ConnectionClosed:
             print("🔌 Frontend disconnected")
         finally:
-            self.stop_detection()
             self.websocket = None
     
     def start_detection(self):
-        """Start the pose detection loop."""
+        """Initialize camera for detection (called before loop)."""
         if self.running:
             return
             
@@ -75,18 +75,12 @@ class MotionPlayBackend:
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         self.cap.set(cv2.CAP_PROP_FPS, 30)
         
-        self.capture_thread = threading.Thread(target=self._capture_loop)
-        self.capture_thread.start()
-        print("🎥 Motion detection started!")
+        print("🎥 Camera initialized!")
         print("📍 Stand in view of camera and stay still for calibration...")
     
     def stop_detection(self):
         """Stop the pose detection loop."""
         self.running = False
-        
-        if self.capture_thread:
-            self.capture_thread.join(timeout=2.0)
-            self.capture_thread = None
         
         if self.cap:
             self.cap.release()
@@ -96,8 +90,12 @@ class MotionPlayBackend:
         self.keyboard_controller.release_all()
         print("🛑 Motion detection stopped")
     
-    def _capture_loop(self):
-        """Main capture and detection loop."""
+    def run_capture_loop(self):
+        """Main capture and detection loop. MUST RUN ON MAIN THREAD."""
+        if not self.running:
+            return
+
+        print("🎥 Starting capture loop...")
         while self.running:
             ret, frame = self.cap.read()
             if not ret:
@@ -140,24 +138,45 @@ class MotionPlayBackend:
                     self.running = False
                 elif key == ord('r'):
                     self.movement_analyzer.reset_calibration()
+        
+        self.stop_detection()
 
-async def main():
+def run_server(backend):
+    """Run WebSocket server in a separate thread."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    async def server_task():
+        print("Waiting for frontend connection on ws://localhost:8765")
+        async with websockets.serve(backend.handle_client, "localhost", 8765):
+            await asyncio.Future()  # Run forever
+            
+    loop.run_until_complete(server_task())
+
+def main():
     """Main entry point."""
     print("=" * 50)
     print("🎮 MotionPlay Backend Server")
     print("=" * 50)
-    print("Waiting for frontend connection on ws://localhost:8765")
     print("Press 'q' in preview window to quit")
     print("Press 'r' in preview window to recalibrate")
     print("=" * 50)
     
     backend = MotionPlayBackend()
     
-    # Start detection immediately for standalone testing
+    # Initialize camera
     backend.start_detection()
     
-    async with websockets.serve(backend.handle_client, "localhost", 8765):
-        await asyncio.Future()  # Run forever
+    # Start WebSocket server in background thread
+    server_thread = threading.Thread(target=run_server, args=(backend,), daemon=True)
+    server_thread.start()
+    
+    # Run capture loop on main thread (required for macOS OpenCV)
+    try:
+        backend.run_capture_loop()
+    except KeyboardInterrupt:
+        print("\nStopping...")
+        backend.stop_detection()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
