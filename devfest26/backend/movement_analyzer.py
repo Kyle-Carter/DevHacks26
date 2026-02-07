@@ -18,9 +18,9 @@ class MovementAnalyzer:
         self.knee_angle_history = deque(maxlen=10)
         
         # Thresholds (tuned for typical webcam setup)
-        self.jump_threshold = 0.05      # How much hip must rise
-        self.squat_threshold = 0.08     # How much hip must lower
-        self.lateral_threshold = 0.06   # How much shoulder center must shift
+        self.jump_threshold = 0.10      # How much hip must rise (Increased from 0.05)
+        self.squat_threshold = 0.10     # How much hip must lower (Increased from 0.08)
+        self.lateral_threshold = 0.08   # How much shoulder center must shift (Increased from 0.06)
         
         # Cooldown to prevent repeated triggers
         self.movement_cooldowns = {
