@@ -23,8 +23,6 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacing-xl);
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
 }
 
 .control-info {
@@ -36,6 +34,7 @@
 .control-info h3 {
     font-size: 1.1rem;
     font-weight: 600;
+    color: var(--text-light);
 }
 
 /* Games Grid */
@@ -56,15 +55,15 @@
 
 .game-card:hover {
     transform: translateY(-4px);
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+    border: 2px solid var(--accent-primary);
+    box-shadow: 0 0 30px rgba(94, 128, 127, 0.2);
 }
 
 .game-thumbnail {
     font-size: 4rem;
     text-align: center;
     padding: var(--spacing-xl);
-    background: var(--gradient-glow);
+    background: rgba(94, 128, 127, 0.2);
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
 }
@@ -77,10 +76,11 @@
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: var(--spacing-xs);
+    color: var(--text-light);
 }
 
 .game-description {
-    color: var(--text-secondary);
+    color: rgba(244, 247, 245, 0.7);
     font-size: 0.9rem;
     margin-bottom: var(--spacing-md);
 }
@@ -94,8 +94,8 @@
 
 .control-tag {
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: rgba(99, 102, 241, 0.15);
-    color: var(--accent-primary);
+    background: rgba(94, 128, 127, 0.3);
+    color: var(--accent-tertiary);
     border-radius: var(--radius-sm);
     font-size: 0.75rem;
     font-weight: 500;

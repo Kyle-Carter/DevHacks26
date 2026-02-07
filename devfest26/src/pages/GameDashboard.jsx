@@ -4,14 +4,6 @@ import './GameDashboard.css'
 const GAMES = [
     {
         id: 1,
-        name: 'Chrome Dino',
-        description: 'Classic endless runner - jump over cacti!',
-        url: 'chrome://dino',
-        thumbnail: '🦖',
-        controls: ['Jump', 'Squat']
-    },
-    {
-        id: 2,
         name: 'Pacman',
         description: 'Navigate the maze and eat all the dots',
         url: 'https://www.google.com/logos/2010/pacman10-i.html',
@@ -19,15 +11,7 @@ const GAMES = [
         controls: ['Move Left', 'Move Right', 'Jump', 'Squat']
     },
     {
-        id: 3,
-        name: 'Slope',
-        description: 'Roll the ball down the slope - avoid obstacles!',
-        url: 'https://slope-game.github.io/',
-        thumbnail: '⚽',
-        controls: ['Move Left', 'Move Right']
-    },
-    {
-        id: 4,
+        id: 2,
         name: 'Subway Surfers',
         description: 'Run through the subway, dodge trains!',
         url: 'https://poki.com/en/g/subway-surfers',
