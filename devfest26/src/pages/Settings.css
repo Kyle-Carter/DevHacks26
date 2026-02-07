@@ -1,0 +1,58 @@
+/* ============================
+   Settings Page Styles
+   ============================ */
+.settings {
+    animation: fadeIn 0.4s ease;
+}
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 900px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Panels */
+.movements-panel,
+.keyboard-panel {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+}
+
+.movements-panel h3,
+.keyboard-panel h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.panel-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Movements List */
+.movements-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+/* Settings Actions */
+.settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+.btn.saved {
+    background: var(--accent-success);
+    pointer-events: none;
+}

@@ -1,0 +1,103 @@
+/* ============================
+   Keyboard Mapper Styles
+   ============================ */
+.keyboard-mapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+}
+
+.keyboard-mapper.is-dragging {
+    background: rgba(99, 102, 241, 0.1);
+    border: 2px dashed var(--accent-primary);
+}
+
+.keyboard-row {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+}
+
+.keyboard-spacer {
+    height: var(--spacing-lg);
+}
+
+/* Individual Key */
+.keyboard-key {
+    --key-size: 60px;
+    width: calc(var(--key-size) * var(--key-width) + (var(--key-width) - 1) * var(--spacing-sm));
+    height: var(--key-size);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    position: relative;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+}
+
+.keyboard-key:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.keyboard-mapper.is-dragging .keyboard-key {
+    border-color: var(--accent-primary);
+    animation: keyPulse 1.5s infinite;
+}
+
+.keyboard-key.drag-over {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.keyboard-key.has-movement {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.key-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.keyboard-key.has-movement .key-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.key-movement {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.movement-icon {
+    font-size: 1.2rem;
+}
+
+@keyframes keyPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+}

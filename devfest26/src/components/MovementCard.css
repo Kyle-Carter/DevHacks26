@@ -1,0 +1,85 @@
+/* ============================
+   Movement Card Styles
+   ============================ */
+.movement-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    cursor: grab;
+    transition: all var(--transition-normal);
+    user-select: none;
+}
+
+.movement-card:hover {
+    border-color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.movement-card:active {
+    cursor: grabbing;
+}
+
+.movement-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    border-color: var(--accent-primary);
+}
+
+.movement-card.mapped {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    border-color: var(--accent-primary);
+}
+
+.movement-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-glow);
+    border-radius: var(--radius-md);
+    font-size: 1.4rem;
+}
+
+.movement-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.movement-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.movement-key {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+}
+
+.clear-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    transition: all var(--transition-fast);
+}
+
+.clear-btn:hover {
+    background: #ef4444;
+    color: white;
+}
