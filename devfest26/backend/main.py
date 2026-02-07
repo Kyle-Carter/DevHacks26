@@ -9,6 +9,7 @@ import cv2
 import websockets
 import threading
 import time
+import sys
 from pose_detector import PoseDetector
 from movement_analyzer import MovementAnalyzer
 from keyboard_controller import KeyboardController
@@ -236,4 +237,6 @@ def main():
         backend.stop_detection()
 
 if __name__ == "__main__":
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     main()

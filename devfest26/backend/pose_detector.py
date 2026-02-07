@@ -12,7 +12,9 @@ from mediapipe.tasks.python import vision
 class PoseDetector:
     def __init__(self):
         # Create an PoseLandmarker object.
-        base_options = python.BaseOptions(model_asset_path='pose_landmarker_lite.task')
+        import os
+        model_path = os.path.join(os.path.dirname(__file__), 'pose_landmarker_lite.task')
+        base_options = python.BaseOptions(model_asset_path=model_path)
         options = vision.PoseLandmarkerOptions(
             base_options=base_options,
             output_segmentation_masks=False)
