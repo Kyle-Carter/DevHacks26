@@ -117,17 +117,57 @@ class MovementAnalyzer:
         # User movement "Left" means moving to Image "Right" (if mirrored) or Vice Versa.
         # We assume Main.py flips the frame. So Image Left = User Left.
         
-        left_line = self.calibrated_pose['left_line']
-        right_line = self.calibrated_pose['right_line']
+        # SIDES: Shoulders cross Side Lines
+        # Note: Image X: 0 is Left, 1 is Right.
         
-        if avg_shoulder_x < left_line:
+        # Calculate Lines relative to Torso Size
+        # We need to maintain the "Safe Zone" width, but shift the Center.
+        cp = self.calibrated_pose
+        safe_width = cp['right_line'] - cp['left_line']
+        half_width = safe_width / 2
+
+        current_center = (cp['left_line'] + cp['right_line']) / 2
+        
+        # Check Triggers with Instant Reset (Ratchet)
+        # If we move Left, we pull the Right Boundary with us.
+        # If we move Right, we pull the Left Boundary with us.
+        
+        # Bias: If we are actively moving/holding a direction, the center shifts towards us.
+        
+        if avg_shoulder_x < cp['left_line']:
             self._handle_trigger('moveLeft', current_movements)
-        else:
-            self.state_timers['moveLeft'] = 0
             
-        if avg_shoulder_x > right_line:
+            # AGGRESSIVE RATCHET
+            # We are holding Left. We want to trigger Right immediately if we move back.
+            # Pull 'right_line' close to us.
+            
+            # Current Postion: avg_shoulder_x. 
+            # Make Right Line = Current + 0.05.
+            # But we also need to keep Left Line valid (e.g. Current - 0.05?)
+            
+            # Let's enforce the standard width but centered such that Right Line is close?
+            # No, user wants instant. Standard width might be too wide.
+            
+            # If we just shift the safe zone so Right Line is close:
+            target_right_line = avg_shoulder_x + 0.04
+            
+            cp['right_line'] = target_right_line
+            cp['left_line'] = target_right_line - safe_width # Maintain width for consistency
+            
+        elif avg_shoulder_x > cp['right_line']:
             self._handle_trigger('moveRight', current_movements)
+            
+            # AGGRESSIVE RATCHET
+            # We are holding Right. Pull Left Line close.
+            
+            target_left_line = avg_shoulder_x - 0.04
+            
+            cp['left_line'] = target_left_line
+            cp['right_line'] = target_left_line + safe_width
+            
         else:
+            # Inside Safe Zone.
+            self.state_timers['moveLeft'] = 0
             self.state_timers['moveRight'] = 0
 
         self.last_movements = current_movements

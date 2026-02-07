@@ -166,6 +166,8 @@ export default function Settings() {
                             />
                             <small>Time before key repeats/holds</small>
                         </div>
+
+
                     </div>
                 </div>
 
