@@ -1,5 +1,5 @@
 """
-MotionPlay Backend Server
+XRcise Backend Server
 WebSocket server that captures webcam, detects poses, and simulates keyboard input.
 """
 
@@ -60,7 +60,7 @@ class ThreadedCamera:
             self.thread.join()
         self.capture.release()
 
-class MotionPlayBackend:
+class XRciseBackend:
     def __init__(self):
         self.pose_detector = PoseDetector()
         self.movement_analyzer = MovementAnalyzer()
@@ -120,6 +120,7 @@ class MotionPlayBackend:
         # Initialize Threaded Camera
         try:
             self.cap = ThreadedCamera(0).start()
+            self.keyboard_controller.start()
             print("🎥 Threaded Camera initialized!")
             print("📍 Stand in view of camera and stay still for calibration...")
         except Exception as e:
@@ -135,7 +136,7 @@ class MotionPlayBackend:
             self.cap = None
         
         cv2.destroyAllWindows()
-        self.keyboard_controller.release_all()
+        self.keyboard_controller.stop()
         print("🛑 Motion detection stopped")
     
     def run_capture_loop(self):
@@ -187,7 +188,7 @@ class MotionPlayBackend:
                     cv2.putText(preview, f"FPS: {int(frame_count / max(elapsed, 0.001))}", (10, 30), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                     
-                    cv2.imshow('MotionPlay Preview', preview)
+                    cv2.imshow('XRcise Preview', preview)
                     
                     # Handle key press for preview window
                     key = cv2.waitKey(1) & 0xFF
@@ -214,13 +215,13 @@ def run_server(backend):
 def main():
     """Main entry point."""
     print("=" * 50)
-    print("🎮 MotionPlay Backend Server")
+    print("🎮 XRcise Backend Server")
     print("=" * 50)
     print("Press 'q' in preview window to quit")
     print("Press 'r' in preview window to recalibrate")
     print("=" * 50)
     
-    backend = MotionPlayBackend()
+    backend = XRciseBackend()
     
     # Initialize camera
     backend.start_detection()

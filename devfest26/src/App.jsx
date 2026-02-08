@@ -9,7 +9,7 @@ function App() {
       <nav className="navbar">
         <div className="nav-brand">
           <span className="brand-icon">🎮</span>
-          <span className="brand-text">MotionPlay</span>
+          <span className="brand-text">XRcise</span>
         </div>
         <div className="nav-links">
           <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

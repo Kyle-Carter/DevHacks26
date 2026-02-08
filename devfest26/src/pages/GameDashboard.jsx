@@ -17,6 +17,14 @@ const GAMES = [
         url: 'https://poki.com/en/g/subway-surfers',
         thumbnail: '🏃',
         controls: ['Move Left', 'Move Right', 'Jump', 'Squat']
+    },
+    {
+        id: 3,
+        name: 'Dino Run',
+        description: 'Run, jump, and duck to avoid obstacles!',
+        url: 'https://trex-runner.com/',
+        thumbnail: '🦖',
+        controls: ['Jump', 'Squat']
     }
 ]
 
