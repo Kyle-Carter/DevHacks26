@@ -35,7 +35,9 @@ class PoseDetector:
     def detect(self, frame):
         """
         Detect pose in frame and return landmarks.
-        Returns dict with normalized landmark positions.
+        Returns:
+            landmarks: dict with normalized landmark positions.
+            detection_result: Raw MediaPipe detection result (for drawing).
         """
         # Convert BGR to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -44,14 +46,14 @@ class PoseDetector:
         detection_result = self.detector.detect(mp_image)
         
         if not detection_result.pose_landmarks:
-            return None
+            return None, None
             
         # Get the first detected pose
         landmarks = detection_result.pose_landmarks[0]
         
         # Extract key landmarks for movement detection
         # Indices based on: https://developers.google.com/mediapipe/solutions/vision/pose_landmarker
-        return {
+        processed_landmarks = {
             'nose': self._get_point(landmarks[0]),
             'left_shoulder': self._get_point(landmarks[11]),
             'right_shoulder': self._get_point(landmarks[12]),
@@ -62,6 +64,8 @@ class PoseDetector:
             'left_ankle': self._get_point(landmarks[27]),
             'right_ankle': self._get_point(landmarks[28]),
         }
+        
+        return processed_landmarks, detection_result
     
     def _get_point(self, landmark):
         """Extract x, y, visibility from landmark."""
@@ -71,16 +75,20 @@ class PoseDetector:
             'visibility': landmark.visibility
         }
     
-    def draw_landmarks(self, frame, draw=True):
-        """Draw pose landmarks on frame for debugging."""
-        if not draw:
-            return frame
-            
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        detection_result = self.detector.detect(mp_image)
+    def draw_landmarks(self, frame, detection_result=None):
+        """
+        Draw pose landmarks on frame.
+        ARGS:
+            frame: The image to draw on.
+            detection_result: Optional pre-computed result. If None, runs detection (slower).
+        """
+        if detection_result is None:
+            # Fallback for separate calls (Legacy/Debug behavior)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+            detection_result = self.detector.detect(mp_image)
         
-        if not detection_result.pose_landmarks:
+        if not detection_result or not detection_result.pose_landmarks:
             return frame
 
         landmarks = detection_result.pose_landmarks[0]

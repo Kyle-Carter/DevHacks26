@@ -24,11 +24,12 @@ class ThreadedCamera:
         # Optimize camera settings immediately
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        self.capture.set(cv2.CAP_PROP_FPS, 30)
+        self.capture.set(cv2.CAP_PROP_FPS, 60) # Target 60 FPS
         # self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 1) # Specific to backend, might not work on all
         
         self.lock = threading.Lock()
         self.frame = None
+        self.frame_id = 0 # Track frame freshness
         self.ret = False
         self.running = False
         self.thread = None
@@ -47,12 +48,14 @@ class ThreadedCamera:
                 with self.lock:
                     self.ret = ret
                     self.frame = frame
+                    if ret:
+                        self.frame_id += 1
             else:
                 time.sleep(0.1)
 
     def read(self):
         with self.lock:
-            return self.ret, self.frame
+            return self.ret, self.frame, self.frame_id
 
     def stop(self):
         self.running = False
@@ -148,20 +151,27 @@ class XRciseBackend:
             print("🎥 Starting capture loop...")
             frame_count = 0
             start_time = time.time()
+            last_frame_id = -1
             
             while self.running:
-                ret, frame = self.cap.read()
+                ret, frame, frame_id = self.cap.read()
                 
                 if not ret or frame is None:
                     # Thread might be starting up
                     time.sleep(0.01)
                     continue
                 
+                # Skip duplicate frames
+                if frame_id == last_frame_id:
+                    time.sleep(0.001) # Ultra short sleep to yield
+                    continue
+                last_frame_id = frame_id
+                
                 # Flip frame horizontally for mirror effect
                 frame = cv2.flip(frame, 1)
                 
-                # Detect pose
-                landmarks = self.pose_detector.detect(frame)
+                # Detect pose (returns tuple now)
+                landmarks, detection_result = self.pose_detector.detect(frame)
                 
                 # Analyze movements
                 movements = self.movement_analyzer.analyze(landmarks)
@@ -171,7 +181,8 @@ class XRciseBackend:
                 
                 # Show preview window
                 if self.show_preview:
-                    preview = self.pose_detector.draw_landmarks(frame.copy())
+                    # Pass the raw detection result to avoid re-running inference!
+                    preview = self.pose_detector.draw_landmarks(frame.copy(), detection_result)
                     
                     # Draw Bounding Box Feedback (Safe Zone, Labels, Calibration)
                     preview = self.movement_analyzer.draw_feedback(preview)
